@@ -86,7 +86,7 @@ class _LoginState extends State<Login> {
 
     return Scaffold(
       appBar: AppBar(
-       title: const Text('Login'),),
+       title: const Text('Account Application'),),
       backgroundColor: Colors.white,
       body: Center(
         child:SingleChildScrollView(
