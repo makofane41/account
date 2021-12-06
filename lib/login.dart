@@ -1,5 +1,13 @@
+
+
 import 'package:account/signup.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:path/path.dart' as path;
+
+import 'homePage.dart';
 
 class Login extends StatefulWidget {
   const Login({ Key? key }) : super(key: key);
@@ -13,6 +21,9 @@ class _LoginState extends State<Login> {
   //form key
 
   final _formKey = GlobalKey<FormState>();
+  //firebase
+
+  final _auth = FirebaseAuth.instance;
 
   //Edit Text controller
   final emailController = new TextEditingController();
@@ -27,7 +38,15 @@ class _LoginState extends State<Login> {
       autofocus: false,
       controller: emailController,
       keyboardType: TextInputType.emailAddress,
-      //validator
+      validator: (value){
+       if(value!.isEmpty){
+         return ("please enter email");
+       }
+       if(!RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(value)){
+         return("enter valid email");
+       }
+       return null;
+      },
       onSaved: (value){
         emailController.text = value!;
       },
@@ -47,7 +66,12 @@ class _LoginState extends State<Login> {
     final passwordField = TextFormField(
       autofocus: false,
       controller: passwordController,
-      //validator
+      validator:(value){
+        if(value!.isEmpty){
+          return("enter password!");
+        }
+        
+      },
       onSaved: (value){
         passwordController.text = value!;
       },
@@ -75,7 +99,9 @@ class _LoginState extends State<Login> {
         padding: EdgeInsets.fromLTRB(20, 15, 20, 20),
         minWidth: MediaQuery.of(context).size.width,
 
-        onPressed: (){},
+        onPressed: (){
+          signIn(emailController.text, passwordController.text);
+        },
         child:Text("Login",
         textAlign: TextAlign.center,
         style: TextStyle(fontSize:20,color: Colors.white, fontWeight: FontWeight.bold),
@@ -142,4 +168,23 @@ class _LoginState extends State<Login> {
       
     );
   }
+
+
+//login back-end
+void signIn (String email, String password) async{
+
+  if(_formKey.currentState!.validate()){
+    await _auth.signInWithEmailAndPassword(email: email, password: password)
+    .then((value) => (uid){
+      
+       Fluttertoast.showToast(msg: "Login succesfully");
+       Navigator.of(context).pushReplacement(MaterialPageRoute(
+         builder:(context)=>HomePage()));
+    }).catchError((e){
+          Fluttertoast.showToast(msg: e!.message);
+    });
+    
+  }
+
+}
 }
